@@ -18,10 +18,7 @@ export default function Login() {
       await login(username, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-          "Invalid username or password. Please try again."
-      );
+      setError("Invalid username or password");
     } finally {
       setBusy(false);
     }
@@ -29,34 +26,27 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <form className="auth-card" onSubmit={handleSubmit}>
         <h1>BPIT ERP</h1>
-        <p className="subtitle">Bhagwan Parshuram Institute of Technology</p>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Username
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoFocus
-              required
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-          {error && <div className="error">{error}</div>}
-          <button type="submit" disabled={busy}>
-            {busy ? "Signing in…" : "Sign In"}
-          </button>
-        </form>
-      </div>
+        <p className="subtitle">Sign in to continue</p>
+        {error && <div className="error-banner">{error}</div>}
+        <label>
+          Username
+          <input value={username} onChange={(e) => setUsername(e.target.value)} required />
+        </label>
+        <label>
+          Password
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        <button type="submit" disabled={busy}>
+          {busy ? "Signing in..." : "Sign In"}
+        </button>
+      </form>
     </div>
   );
 }

@@ -1,91 +1,69 @@
-# BPIT ERP — Core Module (v1)
+# BPIT ERP
 
-A real, running web app foundation for BPIT's college ERP system. This first
-milestone covers: **login, roles, and departments** — the base every other
-module (attendance, results, fees, etc.) will plug into.
+Django (DRF + JWT) backend + React (Vite) frontend.
 
-## What's included
+## Core Module (built)
+- Custom User model with roles (Admin, Faculty, Student, Staff)
+- Department model (CSE, IT, ECE, EEE, AIDS seeded)
+- JWT-based login (`/api/auth/login/`, `/api/auth/refresh/`, `/api/auth/me/`)
+- Users CRUD (admin-only write access)
+- Departments CRUD (admin-only write access)
+- React login page + dashboard showing Departments & Users tables
 
-- **Backend:** Django + Django REST Framework, JWT auth, SQLite (local dev)
-  - Custom `User` model with roles: Admin, HOD, Faculty, Student, Accounts
-  - `Department` model (CSE, IT, ECE, EEE, AI&DS pre-seeded)
-  - Role-based permissions (only Admin can create/manage users)
-  - Django admin panel at `/admin/` for quick data entry
-- **Frontend:** React (Vite) + React Router
-  - Login page
-  - Role-aware dashboard (Admin sees all users; others see their own profile)
-  - JWT stored client-side with automatic token refresh
+## Setup
 
-## Project structure
-
-```
-bpit-erp/
-├── backend/            Django project ("config") + "core" app
-│   ├── core/           models, views, serializers, permissions
-│   ├── db.sqlite3       (created after migrate)
-│   └── manage.py
-└── frontend/            React (Vite) app
-    └── src/
-        ├── api/          axios client with JWT refresh
-        ├── context/      AuthContext (login/logout/session)
-        ├── pages/        Login, Dashboard
-        └── components/   ProtectedRoute
-```
-
-## Running it locally
-
-### 1. Backend
-
+### Backend
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
 python manage.py migrate
-python manage.py seed_departments      # adds CSE, IT, ECE, EEE, AIDS
-python manage.py createsuperuser       # create your admin login
-
+python manage.py createsuperuser   # or use seed below
 python manage.py runserver
 ```
 
-Backend runs at **http://localhost:8000**. Django admin: **http://localhost:8000/admin/**
+Default seeded admin (created via shell, see below): `bpit` / `bpit@admin123`
 
-> ⚠️ After creating your superuser, its `role` defaults to `STUDENT`. Set it to
-> `ADMIN` once, either via `/admin/` or the shell:
-> ```bash
-> python manage.py shell -c "from core.models import User; u=User.objects.get(username='YOUR_USERNAME'); u.role='ADMIN'; u.save()"
-> ```
+To reseed departments + admin user:
+```bash
+python manage.py shell
+```
+```python
+from core.models import User
+from departments.models import Department
 
-### 2. Frontend
+for code, name in [("CSE","Computer Science & Engineering"),("IT","Information Technology"),
+                    ("ECE","Electronics & Communication Engineering"),
+                    ("EEE","Electrical & Electronics Engineering"),
+                    ("AIDS","Artificial Intelligence & Data Science")]:
+    Department.objects.get_or_create(code=code, defaults={"name": name})
 
-In a second terminal:
+u = User(username="bpit", role=User.Role.ADMIN, is_staff=True, is_superuser=True)
+u.set_password("bpit@admin123")
+u.save()
+```
 
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Runs at `http://localhost:5173`, talks to backend at `http://localhost:8000/api`.
 
-Frontend runs at **http://localhost:5173** — open this in your browser and log
-in with the superuser account you created.
+## Student Records Module (built)
+- Student model: enrollment_no, name, department (FK), batch, semester, section, phone, email
+- Optional link to a User account (`user_account`) for future student login
+- Full CRUD via `/api/students/` (admin-only write)
+- Filters: `?department=CSE`, `?batch=2024-28`, `?section=A`, `?semester=3`
+- Search: `?search=<name/enrollment/email/phone>`
+- Bulk import: `POST /api/students/bulk-import/` (multipart form, field `file`, .csv or .xlsx)
+  - Required columns: `enrollment_no, name, department_code, batch`
+  - Optional columns: `semester, section, phone, email`
+  - Re-importing the same `enrollment_no` updates the existing record (no duplicates)
+  - All columns read as strings to avoid pandas mangling phone/enrollment numbers
+- React Students page: filter bar, add-student form, bulk import via file picker, delete
 
-## API reference (v1)
-
-| Method | Endpoint                     | Who                | Purpose                        |
-|--------|-------------------------------|---------------------|---------------------------------|
-| POST   | `/api/auth/login/`            | Public              | Get JWT access + refresh token  |
-| POST   | `/api/auth/refresh/`          | Public              | Refresh access token             |
-| GET    | `/api/me/`                    | Any logged-in user  | Current user's profile          |
-| GET/POST | `/api/departments/`         | Read: any; Write: Admin | List / create departments   |
-| GET/POST | `/api/users/`               | Admin only          | List / create users             |
-| POST   | `/api/users/{id}/set_password/` | Admin only        | Reset a user's password         |
-| POST   | `/api/users/{id}/toggle_active/`| Admin only        | Enable/disable a user account   |
-
-## What's next (future modules)
-
-This is deliberately scoped as the **foundation** — everything else (student
-records, attendance, results, fees, faculty workload, library) will be built
-as additional Django apps + React pages that reuse this same login/role
-system, so you're not starting over each time. Let me know which module you'd
-like next and I'll build it the same way: real code, tested, ready to run.
+## Next module (planned)
+Results/Exams — result upload and report generation, building on Student Records.

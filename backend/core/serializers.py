@@ -1,40 +1,29 @@
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-from .models import Department, User
-
-
-class DepartmentSerializer(serializers.ModelSerializer):
-    hod_name = serializers.CharField(source="hod.get_full_name", read_only=True, default="")
-    member_count = serializers.IntegerField(source="members.count", read_only=True)
-
-    class Meta:
-        model = Department
-        fields = ["id", "code", "name", "hod", "hod_name", "member_count", "created_at"]
+from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    department_code = serializers.CharField(source="department.code", read_only=True, default="")
+    department_name = serializers.CharField(source="department.name", read_only=True)
+    department_code = serializers.CharField(source="department.code", read_only=True)
 
     class Meta:
         model = User
         fields = [
-            "id", "username", "first_name", "last_name", "email", "role",
-            "department", "department_code", "phone", "enrollment_no",
-            "is_active_employee", "is_active", "date_joined",
+            "id", "username", "first_name", "last_name", "email", "phone",
+            "role", "department", "department_name", "department_code",
+            "is_active_member", "date_joined",
         ]
-        read_only_fields = ["date_joined"]
+        read_only_fields = ["id", "date_joined"]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
         model = User
         fields = [
-            "id", "username", "first_name", "last_name", "email", "password",
-            "role", "department", "phone", "enrollment_no",
+            "id", "username", "first_name", "last_name", "email", "phone",
+            "role", "department", "password",
         ]
 
     def create(self, validated_data):
@@ -45,18 +34,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """Adds role/name/department info directly into the JWT payload and login response."""
+class MeSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source="department.name", read_only=True)
 
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token["role"] = user.role
-        token["full_name"] = user.get_full_name() or user.username
-        token["department"] = user.department.code if user.department else None
-        return token
-
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        data["user"] = UserSerializer(self.user).data
-        return data
+    class Meta:
+        model = User
+        fields = [
+            "id", "username", "first_name", "last_name", "email",
+            "role", "department", "department_name",
+        ]

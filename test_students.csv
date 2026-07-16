@@ -1,0 +1,5 @@
+enrollment_no,name,department_code,batch,semester,section,phone,email
+09114802024,Aman Sharma,CSE,2024-28,3,A,9811111111,aman.sharma@example.com
+09114812024,Priya Verma,CSE,2024-28,3,A,9822222222,priya.verma@example.com
+09214802024,Rohit Gupta,IT,2024-28,3,B,9833333333,rohit.gupta@example.com
+09314802024,Sana Khan,ECE,2023-27,5,A,9844444444,sana.khan@example.com
