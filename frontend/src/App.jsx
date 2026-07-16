@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
+import Results from "./pages/Results";
 import "./App.css";
 
 function PrivateRoute({ children }) {
@@ -29,6 +30,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Students />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/results"
+        element={
+          <PrivateRoute>
+            <Results />
           </PrivateRoute>
         }
       />

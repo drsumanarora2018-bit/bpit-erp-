@@ -28,6 +28,7 @@ export default function Dashboard() {
         <nav className="module-nav">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/students">Students</Link>
+          <Link to="/results">Results</Link>
         </nav>
         <div className="user-box">
           <div>

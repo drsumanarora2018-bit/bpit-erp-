@@ -59,3 +59,39 @@ export async function bulkImportStudents(file) {
   });
   return res.data;
 }
+
+export async function fetchSubjects(params = {}) {
+  const res = await client.get("/subjects/", { params });
+  return res.data;
+}
+
+export async function createSubject(payload) {
+  const res = await client.post("/subjects/", payload);
+  return res.data;
+}
+
+export async function bulkImportResults(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await client.post("/results/bulk-import/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+}
+
+export async function fetchMarksheet(enrollmentNo, academicYear) {
+  const res = await client.get("/results/marksheet/", {
+    params: { enrollment_no: enrollmentNo, academic_year: academicYear },
+  });
+  return res.data;
+}
+
+export async function fetchClassSummary(params = {}) {
+  const res = await client.get("/results/class-summary/", { params });
+  return res.data;
+}
+
+export async function fetchResults(params = {}) {
+  const res = await client.get("/results/", { params });
+  return res.data;
+}
